@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="static\images\favicon.ico" type="image/x-icon">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jersey+20+Charted&display=swap" rel="stylesheet">
+    <title>Cohere: Health, Sports and Fitness AI</title>
+</head>
+<body>
+    <h1 class="titoloprincipale">Cohere: Health, Sports and Fitness AI</h1>
+    <form id="generatore_risposta_e_audio_AI" method="POST" action="/generatore_risposta_e_audio_AI" class="generatorerispostaeaudioAI">
+        <label for="prompt_utente" class="frasespiegazioneAI">Hello and welcome to Cohere! I'm an AI assistant focused on health, sports and fitness. I'm here for all your needs in these areas.</label>
+        <br>
+        <p class="paragraforegistrazioni">First, record what you want to ask Cohere:</p>
+        <div class="pulsantiinizioefineregistrazioni">
+            <button type="button" id="pulsante_inizio_registrazione" class="pulsanteinizioregistrazione">Start recording</button> <!-- Pulsante per iniziare a registrare una domanda vocale all'AI -->
+            <button type="button" id="pulsante_fine_registrazione" disabled class="pulsantefineregistrazione">End recording</button> <!-- Pulsante per finire di registrare una domanda vocale all'AI -->    
+        </div>
+        <br>
+        <p class="paragraforispostaAI">Then, let Cohere work its magic by generating an answer for you.</p>
+        <input type="hidden" name="prompt_utente" id="input_vocale_utente" class="promptutente"><br><br>
+        <div class="contenitorepulsantegenerarisposta">
+            <button type="submit" class="pulsantegenerarisposta">Generate the response</button> <!-- Pulsante per fare generare una risposta dall'AI -->
+        </div>
+    </form>
+    <div id="risposta_finale_AI" class="rispostafinaleAI"></div>
+    <div class="contenitorepulsanteinterruzioneaudio">
+        <button type="button" id="pulsante_interruzione_audio" disabled class="pulsanteinterruzioneaudio">Stop replying</button> <!-- Pulsante per fermare improvvisamente l'audio della risposta dell'AI -->
+    </div>
+</body>
+<script>
+    const pulsante_inizio_registrazione = document.getElementById("pulsante_inizio_registrazione"); // Pulsante per avviare la registrazione audio (apre quindi il microfono)
+    const pulsante_fine_registrazione = document.getElementById("pulsante_fine_registrazione"); // Pulsante per terminare la registrazione audio (chiude quindi il microfono)
+    const pulsante_interruzione_audio = document.getElementById("pulsante_interruzione_audio"); // Pulsante per fermare l'audio della risposta da parte dell'AI
+    const input_vocale_utente = document.getElementById("input_vocale_utente"); // Campo di testo HTML nascosto per memorizzare il testo trascritto dalla voce in input dell'utente
+    const riconoscimento_da_voce_a_testo = new (window.SpeechRecognition || window.webkitSpeechRecognition)(); // Inizializza il riconoscimento vocale, scegliendo tra le due principali API disponibili nel browser
+    riconoscimento_da_voce_a_testo.lang = 'en-US';  // Serve per indicare la lingua di riconoscimento vocale, in questo caso sull'inglese americano
+    let audio_risposta_AI;  // Variabile per l'audio della risposta della AI
+    
+    // Settaggio del pulsante che avvia la registrazione
+    pulsante_inizio_registrazione.addEventListener("click", () => {
+        riconoscimento_da_voce_a_testo.start(); // Avvia il riconoscimento vocale per convertire l'audio dell'utente dato in input e convertirlo in testo
+        pulsante_inizio_registrazione.disabled = true; // Disabilita il pulsante di inizio registrazione
+        pulsante_fine_registrazione.disabled = false; // Abilita il pulsante di fine registrazione
+    });
+    
+    // Settaggio del pulsante che termina la registrazione
+    pulsante_fine_registrazione.addEventListener("click", () => {
+        riconoscimento_da_voce_a_testo.stop(); // Chiude il riconoscimento vocale per convertire l'audio dell'utente dato in input e convertirlo in testo
+        pulsante_fine_registrazione.disabled = true; // Disabilita il pulsante di inizio registrazione
+        pulsante_inizio_registrazione.disabled = false; // Riabilita il pulsante di fine registrazione
+    });
+    
+    // Trascrizione testuale della registrazione data in input appena viene terminata con l'apposito pulsante
+    riconoscimento_da_voce_a_testo.onresult = function(event) {
+        const input_vocale_utente_trascritto = event.results[0][0].transcript;
+        input_vocale_utente.value = input_vocale_utente_trascritto;
+    };    
+
+    // Settaggio del pulsante che termina improvvisamente l'audio dell'AI
+    pulsante_interruzione_audio.addEventListener("click", () => {
+        if (audio_risposta_AI) {
+            audio_risposta_AI.pause(); // Mette in pausa (ferma) l'audio in riproduzione
+            audio_risposta_AI.currentTime = 0; // Riporta l'audio all'inizio, per poterlo riprodurre dall'inizio se è necessario
+            audio_risposta_AI = null; // Resetta il valore della variabile, in modo che si svuoti e sia riassegnabile
+            }
+            pulsante_interruzione_audio.disabled = true; // Disabilita il pulsante dopo aver fermato l'audio (quando è già stato premuto), in quanto è già avvenuta l'azione
+        });
+    
+    // Gestione del "generatore_risposta_e_audio_AI" (definito nel file app.py) per l'invio asincrono dell'audio generato dall' AI insieme al testo generato dall' AI
+    const generatore_risposta_e_audio_AI = document.getElementById('generatore_risposta_e_audio_AI');
+    generatore_risposta_e_audio_AI.onsubmit = async (event) => { // Imposta una funzione asincrona
+        event.preventDefault();
+    
+        // Se c'è già un audio in riproduzione, l'audio viene fermato prima di generarne uno nuovo
+        if (audio_risposta_AI) {
+            audio_risposta_AI.pause(); // Mette in pausa (ferma) l'audio in riproduzione
+            audio_risposta_AI.currentTime = 0; // Riporta l'audio all'inizio, per poterlo riprodurre dall'inizio se è necessario
+            audio_risposta_AI = null; // Resetta il valore della variabile, in modo che si svuoti e sia riassegnabile
+        }
+    
+        // Mostra un messaggio di caricamento del testo e dell'audio generato dall'AI
+        let messaggio_caricamento=document.getElementById('risposta_finale_AI');
+        messaggio_caricamento.innerText='Cohere "is thinking about it"...';
+        messaggio_caricamento.style.userSelect='none';
+    
+        // Crea un costante di tipo "FormData" raccogliendo tutti i dati presenti nel form HTML "generatore_risposta_e_audio_AI"
+        const dati_generatore_risposta_e_audio_AI = new FormData(generatore_risposta_e_audio_AI);
+        
+        // Invia una richiesta asincrona al server usando fetch(), inviando i dati del form HTML "generatore_risposta_e_audio_AI"
+        const invio_e_risposta_dati_al_server = await fetch(generatore_risposta_e_audio_AI.action, {
+            method: "POST", // Usa il metodo POST, adatto per inviare dati al server
+            body: dati_generatore_risposta_e_audio_AI // Indica la variabile contenente il corpo del messaggio, quindi i dati da inviare al server
+        });
+    
+        // Indicazioni nel caso l'invio dati al server vada a buon fine
+        if (invio_e_risposta_dati_al_server.ok) {
+            const dati_inviati_al_server = await invio_e_risposta_dati_al_server.json(); // Attende una risposta da parte del server e converte i dati ricevuti in formato JSON
+            document.getElementById("risposta_finale_AI").innerText = dati_inviati_al_server.testo; // Mostra il testo di risposta ricevuto dal server attraverso innerText
+        
+            // Permetti la selezione del testo della risposta finale
+            messaggio_caricamento.innerText = dati_inviati_al_server.testo;  // Usato il testo ricevuto dal server
+            messaggio_caricamento.style.userSelect = "text";  // Permetti la selezione del testo
+        
+            // Aggiunge un timestamp all'URL dell'audio per evitare che venga preso per errore dalla cache, quindi definisce se il file è nuovo o meno
+            const audio_risposta_AI_url = `${dati_inviati_al_server.audio_url}?t=${new Date().getTime()}`;
+        
+            // Crea una nuova costante audio per il file aggiornato e riproduce quest'ultimo
+            audio_risposta_AI = new Audio(audio_risposta_AI_url); // Sovrascrive il file audio con quello dell'URL in modo che sia sempre il file audio aggiornato
+            audio_risposta_AI.play(); // Il file audio viene riprodotto
+            pulsante_interruzione_audio.disabled = false; // Abilita il pulsante per fermare improvvisamente l'audio
+        } else { // Se l'invio dei dati non riesce per un qualsiasi motivo, allora appare un messaggio di errore
+            document.getElementById("risposta_finale_AI").innerText = "Cohere didn't understand what you said or it's probably sleeping. Try again later.";
+            document.getElementById("risposta_finale_AI").style.userSelect = "none";
+        }
+    };
+</script>
+</html>

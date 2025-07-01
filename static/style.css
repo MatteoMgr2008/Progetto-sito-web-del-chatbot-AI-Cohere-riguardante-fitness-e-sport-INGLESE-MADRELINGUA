@@ -1,0 +1,143 @@
+body{
+    font-family: "Inter", sans-serif;
+    background-color: rgb(240,240,240);
+}
+
+button{
+    user-select: none;
+}
+
+h1{
+    user-select: none;
+}
+
+p{
+    user-select: none;
+}
+
+label{
+    user-select: none;
+}
+
+.titoloprincipale{
+    text-align: center;
+    font-size: 40px;
+    padding-top: 10px;
+}
+
+.frasespiegazioneAI{
+    text-align: center;
+    font-size: 20px;
+    display: block; /* Assicura che l'elemento sia in blocco */
+    width: 100%;
+}
+
+.generatorerispostaeaudioAI{
+    line-height: 20px;
+}
+
+.paragraforegistrazioni{
+    text-align: center;
+    font-size: 20px;
+}
+
+.pulsantiinizioefineregistrazioni{
+    text-align: center;
+    padding-top: 20px;
+}
+
+.pulsanteinizioregistrazione{
+    text-align: center;
+    font-size: 20px;
+    background-color: darkgreen;
+    color: whitesmoke;
+    border-radius: 1.5rem;
+    cursor: pointer;
+    padding: 7px 7px;
+    border: none;
+    outline: none;
+}
+
+.pulsanteinizioregistrazione:hover{
+    background-color: green;
+    color: whitesmoke;
+}
+
+.pulsantefineregistrazione{
+    text-align: center;
+    font-size: 20px;
+    background-color: darkred;
+    color: whitesmoke;
+    border-radius: 1.5rem;
+    cursor: pointer;
+    padding: 7px 7px;
+    border: none;
+    outline: none;
+}
+
+.pulsantefineregistrazione:hover{
+    background-color: red;
+    color: whitesmoke;
+}
+
+.paragraforispostaAI{
+    text-align: center;
+    font-size: 20px;
+    display: block;
+    width: 100%;
+}
+
+.contenitorepulsantegenerarisposta{
+    display: flex;
+    justify-content: center;
+}
+
+.pulsantegenerarisposta{
+    text-align: center;
+    font-size: 20px;
+    background-color: grey;
+    color: whitesmoke;
+    border-radius: 1.5rem;
+    cursor: pointer;
+    padding: 7px 7px;
+    border: none;
+    outline: none;
+}
+
+.pulsantegenerarisposta:hover{
+    background-color: darkgrey;
+    color: whitesmoke;
+}
+
+.contenitorepulsanteinterruzioneaudio{
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.pulsanteinterruzioneaudio{
+    text-align: center;
+    font-size: 20px;
+    background-color: grey;
+    color: whitesmoke;
+    border-radius: 1.5rem;
+    cursor: pointer;
+    padding: 7px 7px;
+    border: none;
+    outline: none;
+}
+
+.pulsanteinterruzioneaudio:hover{
+    background-color: darkgrey;
+    color: whitesmoke;
+}
+
+.rispostafinaleAI{
+    font-size: 20px;
+    padding-top: 20px;
+    user-select: text;
+}
+
+#risposta_finale_AI {
+    user-select: text;
+}
